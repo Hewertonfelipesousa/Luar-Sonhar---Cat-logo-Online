@@ -7,7 +7,7 @@ import { ShoppingCart, Search, Star, Heart, Menu, X, Plus, Minus, Instagram, Mes
 import logoHorizontal from './assets/logo_horizontal.png'
 import logoHorizontal2 from './assets/logo_horizontal2.png'
 import heroBgImage from './assets/LogoBrancaComFundoAzul-Marilho.png'
-import videoPlaceholder from './assets/about-1.png'
+import videoPlaceholder from './assets/promocao.png'
 import produto1 from './assets/produto1.png'
 import produto2 from './assets/produto2.jpg'
 import './App.css'
@@ -157,7 +157,7 @@ function App() {
             </Button>
             <img
               src={videoPlaceholder}
-              alt="Vídeo Promocional Luar Sonhar"
+              alt="imagem Promocional Luar Sonhar"
               className="w-full h-auto object-cover"
             />
             {/* Se quiser usar vídeo no futuro:
