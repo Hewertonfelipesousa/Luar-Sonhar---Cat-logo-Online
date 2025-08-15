@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Input } from '@/components/ui/input.jsx'
-import { ShoppingCart, Search, Star, Heart, Menu, X, Plus, Minus, Instagram, MessageCircle } from 'lucide-react'
+import { ShoppingCart, Search, Star, Heart, Menu, X, Plus, Minus, Instagram, MessageCircle, ZoomIn } from 'lucide-react'
 import logoHorizontal from './assets/logo_horizontal.png'
 import logoHorizontal2 from './assets/logo_horizontal2.png'
 import heroBgImage from './assets/LogoBrancaComFundoAzul-Marilho.png'
@@ -24,6 +24,20 @@ function App() {
   const [showVideoModal, setShowVideoModal] = useState(true)
   const [showWhatsappChat, setShowWhatsappChat] = useState(false)
 
+  // NEW: controle de imagem em fullscreen (lupa)
+  const [fullscreenImage, setFullscreenImage] = useState(null)
+  const openImageFullscreen = (imageUrl) => setFullscreenImage(imageUrl)
+  const closeImageFullscreen = () => setFullscreenImage(null)
+
+  // Fecha no ESC
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && fullscreenImage) closeImageFullscreen()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [fullscreenImage])
+
   // Controle do modal com tempo mínimo
   const [minTimePassed, setMinTimePassed] = useState(true)
   const modalRef = useRef(null)
@@ -38,7 +52,7 @@ function App() {
     )
   }
 
-  // 0,3s de exibição mínima ao abrir o modal
+  // 0,2s de exibição mínima ao abrir o modal
   useEffect(() => {
     if (showVideoModal) {
       setMinTimePassed(false)
@@ -49,7 +63,7 @@ function App() {
     }
   }, [showVideoModal])
 
-  // Fechar ao clicar fora (apenas após 0,3s)
+  // Fechar ao clicar fora (apenas após 0,2s)
   const handleOverlayMouseDown = () => {
     if (minTimePassed) setShowVideoModal(false)
   }
@@ -114,27 +128,78 @@ function App() {
 
   // WhatsApp
   const finalizarPedido = () => {
-  if (cart.length === 0) return
-  const pedidoId = `LS${Date.now()}`
-  let mensagem = `🌙 *PEDIDO LUAR SONHAR* 🌙\n\n`
-  mensagem += `🆔 *ID do Pedido:* ${pedidoId}\n\n`
-  mensagem += `🛒 *Itens do Pedido:*\n`
-  cart.forEach(item => {
-    mensagem += `• ${item.name}\n  📏 Tamanho: ${item.selectedSize}\n  🔢 Quantidade: ${item.quantity}\n  💵 Valor: R$ ${(item.price * item.quantity).toFixed(2)}\n\n`
-  })
-  mensagem += `💰 *Total: R$ ${cartTotal.toFixed(2)}*\n\n`
-  mensagem += `📝 Por favor, confirme seus dados:\n• Nome completo:\n• Endereço completo:\n• Telefone para contato:\n\nObrigado por escolher a Luar Sonhar! 💖`
-  
-  const numeroWhatsApp = '5583996179193'
-  const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`
-  window.open(urlWhatsApp, '_blank')
-}
+    if (cart.length === 0) return
+    const pedidoId = `LS${Date.now()}`
+    let mensagem = `🌙 *PEDIDO LUAR SONHAR* 🌙
+
+`
+    mensagem += `🆔 *ID do Pedido:* ${pedidoId}
+
+`
+    mensagem += `🛒 *Itens do Pedido:*
+`
+    cart.forEach(item => {
+      mensagem += `• ${item.name}
+  📏 Tamanho: ${item.selectedSize}
+  🔢 Quantidade: ${item.quantity}
+  💵 Valor: R$ ${(item.price * item.quantity).toFixed(2)}
+
+`
+    })
+    mensagem += `💰 *Total: R$ ${cartTotal.toFixed(2)}*
+
+`
+    mensagem += `📝 Por favor, confirme seus dados:
+• Nome completo:
+• Endereço completo:
+• Telefone para contato:
+
+Obrigado por escolher a Luar Sonhar! 💖`
+
+    const numeroWhatsApp = '5583996179193'
+    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`
+    window.open(urlWhatsApp, '_blank')
+  }
 
   // Util
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   return (
     <div className="min-h-screen gradient-bg">
+
+      {/* NEW: Modal de Imagem Fullscreen (Lupa) */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-[10000] bg-black/80 flex items-center justify-center p-4 animate-fade-in"
+          onMouseDown={closeImageFullscreen}
+          onClick={closeImageFullscreen}
+          onTouchStart={closeImageFullscreen}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative max-w-5xl w-full flex justify-center items-center"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={closeImageFullscreen}
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            <img
+              src={fullscreenImage}
+              alt="Visualização ampliada do produto"
+              className="max-h-[90vh] w-auto object-contain transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Modal de Vídeo/Imagem Promocional */}
       {showVideoModal && (
         <div
@@ -160,11 +225,6 @@ function App() {
               alt="imagem Promocional Luar Sonhar"
               className="w-full h-auto object-cover"
             />
-            {/* Se quiser usar vídeo no futuro:
-            <video controls autoPlay muted onEnded={() => setShowVideoModal(false)} className="w-full h-auto">
-              <source src="/path/to/your/video.mp4" type="video/mp4" />
-              Seu navegador não suporta o elemento de vídeo.
-            </video> */}
           </div>
         </div>
       )}
@@ -337,19 +397,32 @@ function App() {
             {filteredProducts.map(product => (
               <Card key={product.id} className="product-card">
                 <CardHeader className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img src={product.image} alt={product.name} className="w-full h-64 object-cover hover-scale" />
+                  <div className="relative overflow-hidden rounded-t-lg group cursor-zoom-in">
+                    {/* Clique para abrir fullscreen */}
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-64 object-cover hover-scale"
+                      onClick={() => openImageFullscreen(product.image)}
+                    />
+
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => toggleFavorite(product.id)}
-                      className={`absolute top-4 right-4 bg-white/80 backdrop-blur-sm transition-colors ${favorites.includes(product.id) ? 'text-red-500' : 'text-gray-700'
-                        }`}
+                      aria-pressed={favorites.includes(product.id)}
+                      title={favorites.includes(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      className={`absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm transition-colors ${favorites.includes(product.id) ? 'text-red-500' : 'text-gray-700'}`}
                     >
-                      <Heart className={`h-4 w-4 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 ${favorites.includes(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>
 
                     <Badge className="absolute top-4 left-4 bg-primary">⭐ {product.rating}</Badge>
+
+                    {/* Overlay do ícone de lupa no hover (não bloqueia cliques) */}
+                    <div className="absolute inset-0 z-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                      <ZoomIn className="w-10 h-10 text-white drop-shadow-lg" />
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -418,9 +491,9 @@ function App() {
             <Button
               className="w-full bg-green-500 hover:bg-green-600"
               onClick={() => {
-                const numeroWhatsApp = '5583996179193'; // DDI + DDD + número
-                const mensagem = encodeURIComponent('Olá! Gostaria de atendimento da Luar Sonhar 🌙');
-                window.open(`https://wa.me/${numeroWhatsApp}?text=${mensagem}`, '_blank');
+                const numeroWhatsApp = '5583996179193'
+                const mensagem = encodeURIComponent('Olá! Gostaria de atendimento da Luar Sonhar 🌙')
+                window.open(`https://wa.me/${numeroWhatsApp}?text=${mensagem}`, '_blank')
               }}
             >
               Iniciar Conversa
